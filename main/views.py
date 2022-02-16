@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from . models import ToDoList, Item
+from .forms import CreateNewList
 
 def index(response, id):
     ls = ToDoList.objects.get(id=id)
@@ -11,4 +12,13 @@ def home(response):
     return render(response, "main/home.html", {"name":"test"})
 
 def create(response):
-    return render(response, "main/create.html", {})
+    if response.method == "POST":
+        form = CreateNewList(response.POST)
+
+        if form.is_valid():
+            n = form.cleaned_data["name"]
+            t = ToDoList(name=n)
+            t.save()
+    else:
+        form = CreateNewList()
+    return render(response, "main/create.html", {"form":form})
